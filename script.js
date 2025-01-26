@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="how-to" class="collapse">
                 <div class="col-sm-6">
                     When picking up a larger amount of stitches I find it helps to divide the edge you're picking up from into smaller sections. 
-                    This calculator can help you with that process. Just enter if your picked up stitches will be worked flat or in the round and  
-                    the total number of stitches you're going to pick up. 
+                    This calculator can help you with that process. Just enter the total number of stitches you're going to pick up and the length of your
+                    edge if you like to know the length of each section. It doesn't matter which unit your length input is - the output will be in the same unit.
                     When working in the round, it might be handier to have an even number of sections, 
                     so that you only have to measure one half of your edge.
                 </div>
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <p id="amount-of-markers"></p>
                         <h6 class="card-subtitle text-muted">Stitches between markers:</h6>
                         <p id="stitch-counts"></p>
-                        <h6 class="card-subtitle text-muted">Length per section</h6>
+                        <h6 class="card-subtitle text-muted">Length per section:</h6>
                         <p id="length-per-section"></p>
                     </div>
                 </div>
