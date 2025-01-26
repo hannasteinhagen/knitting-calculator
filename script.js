@@ -124,6 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const leftoverStitches = totalStitches % numSections;
 
                 if (leftoverStitches == 0) {
+                    bestDistribution = numSections;
+                    minDeviation = leftoverStitches;
                     break;
                 }
 
@@ -140,14 +142,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 sections[i] = Math.floor(totalStitches / bestDistribution);
             }
             
-            //Distribute leftover stitches
+            //Distribute leftover stitches, if any
             const step = Math.floor(bestDistribution / minDeviation);
             let index = 0;
 
-            for (let i = 0; i < minDeviation; i++) {
-                sections[index]++;
-                index += step;
+            if (minDeviation != 0) {
+                for (let i = 0; i < minDeviation; i++) {
+                    sections[index]++;
+                    index += step;
+                }
             }
+            
 
             //Turn sections array into string
             let StitchAmountString = "";
