@@ -3,33 +3,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const pages = {
         "stitch-pickup": `
-            <h2>Arm stitch calculator</h2>
-            <form id="arm-stitch-form" class="row g-2 was-validated" novalidate>
+            <h2>Picking up stitches evenly</h2>
 
-            <!-- Total stitches to be picked up -->
-            <div class="col-sm-3">
-                <label for="total-stitches" class="form-label">Total stitches to be picked up</label>
-                <input type="number" id="total-stitches" class="form-control input-field w-100" min="10" max="300" required>
-                <div class="invalid-feedback">Please enter an amount between 10 and 300.</div>
+            <p>
+                <a class="btn btn btn-outline-primary" data-bs-toggle="collapse" href="#how-to" role="button" aria-expanded="false" aria-controls="how-to">How to use</a>
+            </p>
+
+
+            <div id="how-to" class="collapse">
+                <div class="col-sm-6">
+                    When picking up a larger amount of stitches I find it helps to divide the edge you're picking up from into smaller sections. 
+                    This calculator can help you with that process. Just enter if your picked up stitches will be worked flat or in the round and  
+                    the total number of stitches you're going to pick up. 
+                    When working in the round, it might be handier to have an even number of sections, 
+                    so that you only have to measure one half of your edge.
+                </div>
             </div>
 
-            <!-- Max stitches between markers -->
-            <div class="col-sm-3">
-                <label for="max-stitches" class="form-label">Max stitches between markers</label>
-                <input type="number" id="max-stitches" class="form-control input-field w-100" value="11" min="5" max="15" required>
-                <div class="invalid-feedback">Please enter an amount between 5 and 15.</div>
-            </div>
 
-            <!-- Button to calculate-->
-            <div class="col-sm-12">
-                <button type="button" id="calculate-button" class="btn btn-primary">Calculate</button>
-            </div>
+            <form id="stitch-pickup-form" class="row g-2 was-validated mt-2" novalidate>
+            
+                <!-- length -->
+                <div class="col-sm-2">
+                    <label for="length" class="form-label">Length of your edge</label>
+                    <input type="number" step="0.1" id="length" class="form-control input-field w-100 min="1">
+                </div>
 
-            <!-- Checkbox for even number of sections-->
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="even-number" name="even" value="something">
-                <label class="form-check-label">Do you prefer an even number of</label>
-            </div>
+                <!-- Total stitches to be picked up -->
+                <div class="col-sm-2">
+                    <label for="total-stitches" class="form-label">Total stitches</label>
+                    <input type="number" id="total-stitches" class="form-control input-field w-100" min="10" max="300" required>
+                    <div class="invalid-feedback">Please enter an amount between 10 and 300.</div>
+                </div>
+
+                <!-- Checkbox for even number of sections-->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="even-number" name="even" value="something">
+                        <label class="form-check-label">Do you prefer an even number of sections?</label>
+                    </div>
+
+                <!-- Button to calculate-->
+                <div class="col-sm-12">
+                    <button type="button" id="calculate-button" class="btn btn-primary">Calculate</button>
+                </div>
 
             </form>
 
@@ -41,6 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         <p id="amount-of-markers"></p>
                         <h6 class="card-subtitle text-muted">Stitches between markers:</h6>
                         <p id="stitch-counts"></p>
+                        <h6 class="card-subtitle text-muted">Length per section</h6>
+                        <p id="length-per-section"></p>
                     </div>
                 </div>
             </div>
@@ -49,10 +67,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         "about": `
             <div id="about" class="container-fluid">
-               <h2>About me</h2>
+                <h2>About me</h2>
+                <div id="abut-me-card" class="card">
+                    <div class="card-body">
+                        <p class="card-text">
+                            My name is Hanna and I live in Trondheim, Norway. I recently started coding a bit and this is one of my first projects. 
+                            If you have any type of feedback or requests for calculators I could add here, feel free to head over to my Instagram: 
+                        </p>
+                        <a href="https://www.instagram.com/norveganknitting/" target="_blank">@norveganknitting</a>
+                    </div>
+
+                </div>
              </div>
         `
     };
+
+    //Default page
+    const defaultPage = "about";
+    content.innerHTML = pages[defaultPage];
 
     //Handling navigation
     document.querySelectorAll(".nav-link").forEach(link => {
@@ -70,38 +102,65 @@ document.addEventListener("DOMContentLoaded", () => {
         const button = document.getElementById("calculate-button")
         button.addEventListener("click", () => {
             const totalStitches = Number(document.getElementById("total-stitches").value);
-            const maxStitches = Number(document.getElementById("max-stitches").value);
             const checkbox = document.getElementById("even-number");
+            const length = document.getElementById("length").value;
+            const minPerSection = 6;
+            const maxPerSection = 11;
 
-            //Calculate amount of sections
-            const sectionAmount = Math.ceil(totalStitches/maxStitches) + (checkbox.checked && Math.ceil(totalStitches/maxStitches) % 2 !== 0 ? 1 : 0);
+            //Find possible interval for #sections
+            const minSections = Math.ceil(totalStitches/maxPerSection);
+            const maxSections = Math.floor(totalStitches/minPerSection);
+
+            let bestDistribution = null;
+            let minDeviation = Infinity;
+
+            for (let numSections = minSections; numSections <= maxSections; numSections++) {
+                //Continue to next iteration if checkbox is checked and sections is odd amount
+                if (checkbox && numSections % 2 !== 0) {
+                    continue;
+                }
+
+                //Calculate leftover stitches
+                const leftoverStitches = totalStitches % numSections;
+
+                if (leftoverStitches == 0) {
+                    break;
+                }
+
+                else if (leftoverStitches < minDeviation) {
+                    bestDistribution = numSections;
+                    minDeviation = leftoverStitches;
+                }
+            
+            }
+
+            //Array for stitch distribution
+            let sections = new Array(bestDistribution);
+            for (let i = 0; i < bestDistribution; i++) {
+                sections[i] = Math.floor(totalStitches / bestDistribution);
+            }
+            
+            //Distribute leftover stitches
+            const step = Math.floor(bestDistribution / minDeviation);
+            let index = 0;
+
+            for (let i = 0; i < minDeviation; i++) {
+                sections[index]++;
+                index += step;
+            }
+
+            //Turn sections array into string
+            let StitchAmountString = "";
+            for (let i = 0; i < sections.length; i++) {
+                StitchAmountString += sections[i] + " ";
+            }
 
             //Add number of markers to card
-            document.getElementById("amount-of-markers").innerHTML = sectionAmount;
-
-            //Calculating number of stitches per section
-            const startingValue = Math.floor(totalStitches/sectionAmount);
-            let remainingStitches = totalStitches - (startingValue * sectionAmount);
-            const sections = new Array(sectionAmount);
-            for (let i = 0; i < sectionAmount; i++) {
-                sections[i] = startingValue;
-            }
-
-            let index = 0;
-            while (remainingStitches != 0) {
-                sections[index] += 1;
-                remainingStitches -= 1;
-                index += 1;
-            }
-
-            //Turn section-array into string
-            let StitchAmountString = "";
-            for (let i= 0; i < sections.length; i++) {
-                StitchAmountString += `${sections[i]} `;
-            }
-
+            document.getElementById("amount-of-markers").innerHTML = bestDistribution;
             //Add stitch amounts to card
             document.getElementById("stitch-counts").innerHTML = StitchAmountString;
+            //Add length per section
+            document.getElementById("length-per-section").innerHTML = (length / bestDistribution).toFixed(2);
         });
     }
 });
