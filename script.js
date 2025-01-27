@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             for (let numSections = minSections; numSections <= maxSections; numSections++) {
                 //Continue to next iteration if checkbox is checked and sections is odd amount
-                if (checkbox && numSections % 2 !== 0) {
+                if (checkbox.checked && numSections % 2 !== 0) {
                     continue;
                 }
 
@@ -156,9 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             //Turn sections array into string
             let StitchAmountString = "";
-            for (let i = 0; i < sections.length; i++) {
-                StitchAmountString += sections[i] + " ";
+            for (let i = 0; i < sections.length - 1; i++) {
+                StitchAmountString += sections[i] + " - ";
             }
+            StitchAmountString += sections.slice(-1);
 
             //Add number of markers to card
             document.getElementById("amount-of-markers").innerHTML = bestDistribution;
